@@ -12,6 +12,7 @@ def load_client():
     for device in devices:
         try:
             client = TrezorClientDebugLink(device)
+            print("Selected device:", device)
             break
         except Exception:
             pass
