@@ -9,6 +9,9 @@ from trezorlib.transport import enumerate_devices
 
 def load_client():
     devices = enumerate_devices()
+    print("Devices:")
+    for device in devices:
+        print("  ", device)
     for device in devices:
         try:
             client = TrezorClientDebugLink(device)
