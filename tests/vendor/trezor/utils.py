@@ -1,22 +1,40 @@
+import os
 import socket
 from fido2.ctap import STATUS
 
 from trezorlib import debuglink
 from trezorlib.debuglink import TrezorClientDebugLink
 from trezorlib.device import wipe as wipe_device
-from trezorlib.transport import enumerate_devices
+from trezorlib.transport import enumerate_devices, get_transport
+
+
+def get_device():
+    path = os.environ.get("TREZOR_PATH")
+    interact = int(os.environ.get("INTERACT", 0))
+    if path:
+        try:
+            transport = get_transport(path)
+            return TrezorClientDebugLink(transport, auto_interact=not interact)
+        except Exception as e:
+            raise RuntimeError("Failed to open debuglink for {}".format(path)) from e
+
+    else:
+        devices = enumerate_devices()
+        for device in devices:
+            try:
+                return TrezorClientDebugLink(device, auto_interact=not interact)
+            except Exception:
+                pass
+        else:
+            raise RuntimeError("No debuggable device found")
 
 
 def load_client():
-    devices = enumerate_devices()
-    for device in devices:
-        try:
-            client = TrezorClientDebugLink(device)
-            break
-        except Exception:
-            pass
-    else:
-        raise RuntimeError("No debuggable device found")
+    try:
+        client = get_device()
+    except RuntimeError:
+        request.session.shouldstop = "No debuggable Trezor is available"
+        pytest.fail("No debuggable Trezor is available")
 
     wipe_device(client)
     debuglink.load_device_by_mnemonic(
