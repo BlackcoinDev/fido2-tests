@@ -12,7 +12,7 @@ def load_client():
     print("Devices:")
     for device in devices:
         print("  ", device)
-    for device in devices:
+    for device in reversed(devices):
         try:
             client = TrezorClientDebugLink(device)
             print("Selected device:", device)
