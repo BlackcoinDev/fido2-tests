@@ -10,11 +10,10 @@ from trezorlib.transport import enumerate_devices, get_transport
 
 def get_device():
     path = os.environ.get("TREZOR_PATH")
-    interact = int(os.environ.get("INTERACT", 0))
     if path:
         try:
             transport = get_transport(path)
-            return TrezorClientDebugLink(transport, auto_interact=not interact)
+            return TrezorClientDebugLink(transport)
         except Exception as e:
             raise RuntimeError("Failed to open debuglink for {}".format(path)) from e
 
@@ -22,7 +21,7 @@ def get_device():
         devices = enumerate_devices()
         for device in devices:
             try:
-                return TrezorClientDebugLink(device, auto_interact=not interact)
+                return TrezorClientDebugLink(device)
             except Exception:
                 pass
         else:
